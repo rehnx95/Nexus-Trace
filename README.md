@@ -1,5 +1,7 @@
 # NexusTrace (SIH26189) - Crime Network Analysis Platform
 
+**🌐 Live demo:** [nexustrace-1.onrender.com](https://nexustrace-1.onrender.com/) *(open the [backend link](https://nexustrace-65jm.onrender.com/) first and wait ~30-60s for it to wake up)*
+
 An intelligent graph-based analysis platform for extracting entities from police FIR (First Information Report) and CDR (Call Detail Record) texts, building relationship networks, identifying key players, and detecting suspicious patterns across multiple cases.
 
 **[Full System Architecture Documentation](ARCHITECTURE.md)** — Comprehensive guide for senior engineers, and new contributors.
@@ -411,28 +413,22 @@ Project for Smart India Hackathon 2026 - SIH26189
 
 ---
 
-## 👥 Team
-
-Built for crime network analysis and law enforcement intelligence gathering.
-
----
 
 ## 🔗 Links
 
-- **Live Demo**:
+### 🌐 Live Demo
 
-First Start Backend Using This Link
-https://nexustrace-65jm.onrender.com/
-Then See The Demo
-https://nexustrace-1.onrender.com/
+The app is hosted on Render's free tier, so the backend sleeps when idle and takes about 30-60 seconds to wake up. It isn't broken, just cold-starting.
 
-- **Neo4j**: https://neo4j.com/cloud/aura
-- **spaCy**: https://spacy.io
-- **FastAPI**: https://fastapi.tiangolo.com
-- **React**: https://react.dev
-- **vis-network**: https://visjs.github.io/vis-network/
+1. **Wake the backend first:** [https://nexustrace-65jm.onrender.com/](https://nexustrace-65jm.onrender.com/) (wait until it loads)
+2. **Then open the app:** [https://nexustrace-1.onrender.com/](https://nexustrace-1.onrender.com/)
 
----
+### 📚 Tech Docs
+- **Neo4j:** [https://neo4j.com/cloud/aura](https://neo4j.com/cloud/aura)
+- **spaCy:** [https://spacy.io](https://spacy.io)
+- **FastAPI:** [https://fastapi.tiangolo.com](https://fastapi.tiangolo.com)
+- **React:** [https://react.dev](https://react.dev)
+- **vis-network:** [https://visjs.github.io/vis-network/](https://visjs.github.io/vis-network/)
 
 ## 📞 Support
 
