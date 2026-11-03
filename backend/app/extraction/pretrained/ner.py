@@ -32,8 +32,22 @@ class NerExtractor:
         if self.model is not None:
             doc = self.model(text)
             for span in doc.ents:
-                entity_type = {"PERSON": "Person", "LOC": "Location", "GPE": "Location",
-                               "FAC": "Location", "ORG": "Organization"}.get(span.label_)
+                entity_type = {
+                    "PERSON": "Person",
+                    "LOC": "Location",
+                    "LOCATION": "Location",
+                    "GPE": "Location",
+                    "FAC": "Location",
+                    "ORG": "Organization",
+                    "ORGANIZATION": "Organization",
+                    "VEHICLE": "Vehicle",
+                    "PHONE": "Phone",
+                }.get(span.label_)
+                # Phones and vehicles are authoritative regex/validator entities.
+                # NER labels may recognize their text, but must not create raw-ID
+                # duplicates or bypass deterministic normalization.
+                if entity_type in {"Phone", "Vehicle"}:
+                    continue
                 if entity_type:
                     spans.append({
                         "type": entity_type,

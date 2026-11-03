@@ -51,3 +51,38 @@ def test_phase1_walking_skeleton_writes_to_in_memory_store():
     assert summary["entities_written"] == 2
     assert summary["rejected_entities"] == 0
     assert len(store.entities["case-1"]) == 2
+
+
+def test_case_alpha_produces_evidence_backed_facts_without_invented_owner():
+    result = PretrainedFirstExtractor().extract(
+        [
+            {
+                "filename": "case-alpha.txt",
+                "text": (
+                    "Arjun Iyer uses phone 9876543210 and was seen at Central Market. "
+                    "The vehicle KA05MH1234 was parked near Central Market."
+                ),
+            }
+        ]
+    )
+
+    assert {entity.id for entity in result.entities} >= {
+        "Arjun Iyer",
+        "+919876543210",
+        "Central Market",
+        "KA05MH1234",
+    }
+
+    keys = {
+        (
+            edge.source_type,
+            edge.source_id,
+            edge.type,
+            edge.target_type,
+            edge.target_id,
+        )
+        for edge in result.edges
+    }
+    assert ("Person", "Arjun Iyer", "USES_DEVICE", "Phone", "+919876543210") in keys
+    assert ("Person", "Arjun Iyer", "SPOTTED_AT", "Location", "Central Market") in keys
+    assert not any("OWN" in edge.type or "ASSOCIAT" in edge.type for edge in result.edges)
