@@ -2,34 +2,87 @@ import os
 from neo4j import GraphDatabase
 
 _driver = None
+_driver_config = None
+_last_connection_error = None
+
+
+class Neo4jConnectionError(RuntimeError):
+    pass
+
+
+def _normalize_uri(uri: str) -> str:
+    uri = uri.strip()
+    if "databases.neo4j.io" in uri and uri.startswith("bolt://"):
+        return "neo4j+s://" + uri[len("bolt://"):]
+    return uri
 
 
 def get_driver():
     global _driver
-    if _driver is None:
-        uri = os.environ["NEO4J_URI"]
-        username = os.environ["NEO4J_USERNAME"]
-        password = os.environ["NEO4J_PASSWORD"]
-        _driver = GraphDatabase.driver(uri, auth=(username, password))
+    global _driver_config
+    missing = [
+        name
+        for name in ("NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD")
+        if not os.getenv(name)
+    ]
+    if missing:
+        raise Neo4jConnectionError(
+            "Missing Neo4j environment settings: " + ", ".join(missing)
+        )
+    uri = _normalize_uri(os.environ["NEO4J_URI"])
+    username = os.environ["NEO4J_USERNAME"]
+    password = os.environ["NEO4J_PASSWORD"]
+    config = (uri, username, password, os.getenv("NEO4J_DATABASE", ""))
+    if _driver is None or _driver_config != config:
+        if _driver is not None:
+            _driver.close()
+        if "+s" in uri or uri.endswith("+ssc"):
+            _driver = GraphDatabase.driver(uri, auth=(username, password))
+        else:
+            _driver = GraphDatabase.driver(uri, auth=(username, password))
+        _driver_config = config
     return _driver
-
 
 def verify_connectivity():
     """Returns True if we can actually reach and authenticate against Neo4j."""
+    global _last_connection_error
     try:
         get_driver().verify_connectivity()
+        _last_connection_error = None
         return True
-    except Exception:
+    except Exception as exc:
+        _last_connection_error = str(exc)
         return False
+
+
+def get_connection_error() -> str | None:
+    return _last_connection_error
 
 
 def query(cypher_query, parameters=None):
     """Run a cypher query and return a list of records (dict-like)."""
-    driver = get_driver()
-    database = os.environ.get("NEO4J_DATABASE")
-    with driver.session(database=database) if database else driver.session() as session:
-        result = session.run(cypher_query, parameters or {})
-        return [record.data() for record in result]
+    global _driver
+    global _driver_config
+    global _last_connection_error
+    try:
+        driver = get_driver()
+        database = os.environ.get("NEO4J_DATABASE")
+        with driver.session(database=database) if database else driver.session() as session:
+            result = session.run(cypher_query, parameters or {})
+            rows = [record.data() for record in result]
+            _last_connection_error = None
+            return rows
+    except Neo4jConnectionError:
+        raise
+    except Exception as exc:
+        _driver = None
+        _driver_config = None
+        _last_connection_error = str(exc)
+        raise Neo4jConnectionError(
+            f"Cannot connect to Neo4j at {_normalize_uri(os.getenv('NEO4J_URI', ''))}. "
+            "Check that Neo4j is running, the URI includes the correct protocol, "
+            "and the username/password/database are correct."
+        ) from exc
 
 
 def clear_database():

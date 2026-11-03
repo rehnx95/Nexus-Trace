@@ -1,0 +1,78 @@
+rules:
+  - id: REL-SPOTTED-AT
+    type: SPOTTED_AT
+    allowed_types: [["Person", "Location"]]
+    role: subject_object
+    confidence: 0.88
+    patterns:
+      - "\\b(?:seen|spotted|located|present|visited|arrived)\\b.*\\b(?:at|near|in)\\b"
+      - "\\bwas\\s+at\\b"
+    positive:
+      - "Rohan Sharma was seen at Central Market."
+      - "Nisha Rao was spotted near Court Road."
+    negative:
+      - "Rohan Sharma and Nisha Rao were interviewed separately."
+
+  - id: REL-OWNS-VEHICLE
+    type: OWNS_VEHICLE
+    allowed_types: [["Person", "Vehicle"]]
+    role: bidirectional
+    confidence: 0.90
+    patterns:
+      - "\\b(?:owns?|drives?|registered\\s+(?:to|in\\s+the\\s+name\\s+of)|belong(?:s)?\\s+to|vehicle\\s+of)\\b"
+    positive:
+      - "Rohan Sharma owns KA01AB1234."
+      - "The vehicle KA01AB1234 is registered in the name of Rohan Sharma."
+    negative:
+      - "Rohan Sharma was interviewed near a parked vehicle."
+
+  - id: REL-USES-DEVICE
+    type: USES_DEVICE
+    allowed_types: [["Person", "Phone"]]
+    role: subject_object
+    confidence: 0.90
+    patterns:
+      - "\\b(?:uses?|using|calls?\\s+from|mobile\\s+of|phone\\s+(?:of|belongs\\s+to))\\b"
+    positive:
+      - "Rohan Sharma uses 9876543210."
+      - "The phone belongs to Rohan Sharma."
+    negative:
+      - "Rohan Sharma and another person were contacted."
+
+  - id: REL-ASSOCIATE
+    type: ASSOCIATE_OF
+    allowed_types: [["Person", "Person"]]
+    role: subject_object
+    confidence: 0.82
+    patterns:
+      - "\\b(?:seen\\s+with|associate(?:d)?\\s+with|spouse\\s+of|wife\\s+of|husband\\s+of)\\b"
+    positive:
+      - "Rohan Sharma was seen with Nisha Rao."
+      - "Nisha Rao is associated with Rohan Sharma."
+    negative:
+      - "Rohan Sharma and Nisha Rao were interviewed separately."
+
+  - id: REL-FINANCIAL
+    type: FINANCIAL_TRAIL
+    allowed_types: [["Person", "Person"], ["Person", "Organization"]]
+    role: subject_object
+    confidence: 0.90
+    patterns:
+      - "\\b(?:transferred|transfer|paid|payment\\s+to|remitted|withdrew)\\b"
+    positive:
+      - "Rohan Sharma transferred Rs. 55,000 to Nisha Rao."
+      - "Rohan Sharma paid Nova Traders Limited."
+    negative:
+      - "Rohan Sharma said the shop was closed."
+
+  - id: REL-FINANCIAL-PASSIVE
+    type: FINANCIAL_TRAIL
+    allowed_types: [["Person", "Person"], ["Person", "Organization"]]
+    role: passive_agent
+    confidence: 0.88
+    patterns:
+      - "\\b(?:was|were)\\s+(?:transferred|paid|remitted)\\b.*\\bby\\b"
+    positive:
+      - "Rs. 55,000 was transferred to Nisha Rao by Rohan Sharma."
+    negative:
+      - "The transfer was discussed by Rohan Sharma and Nisha Rao."

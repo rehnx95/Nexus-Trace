@@ -4,12 +4,18 @@ ENTITY_TYPES = {
     "Organization": {"id", "name"},
     "Vehicle": {"id", "plate"},
     "Phone": {"id", "number"},
+    "BankAccount": {"id", "account_number", "kind"},
 }
 
 RELATIONSHIPS = {
     "INTERCEPTED_CALL": {("Phone", "Phone")},
     "ASSOCIATE_OF": {("Person", "Person")},
-    "FINANCIAL_TRAIL": {("Person", "Person"), ("Phone", "Phone"), ("Person", "Organization")},
+    "FINANCIAL_TRAIL": {
+        ("Person", "Person"),
+        ("Phone", "Phone"),
+        ("Person", "Organization"),
+        ("BankAccount", "BankAccount"),
+    },
     "SPOTTED_AT": {("Person", "Location")},
     "OWNS_VEHICLE": {("Person", "Vehicle")},
     "USES_DEVICE": {("Person", "Phone")},

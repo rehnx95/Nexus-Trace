@@ -7,7 +7,7 @@ class Mention:
     text: str
     start: int
     end: int
-    method: Literal["regex", "table"]
+    method: Literal["regex", "table", "llm", "ner", "gazetteer"]
     confidence: float
     rule_id: str
     document_id: str

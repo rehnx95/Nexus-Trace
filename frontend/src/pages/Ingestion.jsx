@@ -67,7 +67,7 @@ try {
 
   setStatus({
     kind: 'success',
-    message: `Processed ${result.files} file(s): extracted ${result.entities} entities and ${result.edges} edges. Phones: ${result.phones}; plates: ${result.plates}; valid CDR rows: ${result.cdr_valid_rows}.${result.rejected_files?.length ? ` Rejected: ${result.rejected_files.map((item) => item.filename).join(', ')}.` : ''}`,
+    message: `Processed ${result.files} file(s): extracted ${result.entities} entities and ${result.edges} edges. Phones: ${result.phones}; plates: ${result.plates}; valid CDR rows: ${result.cdr_valid_rows}.${result.diagnostics?.coverage?.needs_review ? ' Coverage is low; review the extracted evidence.' : ''}${result.rejected_files?.length ? ` Rejected: ${result.rejected_files.map((item) => item.filename).join(', ')}.` : ''}`,
   })
   setFiles([])
   if (fileInputRef.current) fileInputRef.current.value = ''

@@ -8,6 +8,7 @@ import GraphView from './pages/GraphView'
 import KeyPlayers from './pages/KeyPlayers'
 import Anomalies from './pages/Anomalies'
 import AuditTrail from './pages/AuditTrail'
+import Review from './pages/Review'
 import KeyboardShortcuts from './components/KeyboardShortcuts'
 import { motion } from 'framer-motion'
 
@@ -19,6 +20,7 @@ const TABS = [
   { key: 'key-players', label: 'Key Player ID', title: 'Key Player Identification' },
   { key: 'anomalies', label: 'Anomaly Detection', title: 'Suspicious Pattern Detection' },
   { key: 'audit', label: 'Audit Trail', title: 'Tamper-Evident Audit Log' },
+  { key: 'review', label: 'Merge Review', title: 'Entity Merge Review Queue' },
 ]
 
 function useIsMobile(breakpoint = 640) {
@@ -269,6 +271,7 @@ export default function App() {
           {tab === 'key-players' && <KeyPlayers refreshKey={refreshKey} />}
           {tab === 'anomalies' && <Anomalies refreshKey={refreshKey} />}
           {tab === 'audit' && <AuditTrail refreshKey={refreshKey} />}
+          {tab === 'review' && <Review />}
         </div>
       </main>
     </div>

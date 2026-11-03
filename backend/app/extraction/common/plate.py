@@ -1,5 +1,6 @@
 import re
 
+from app.extraction.common.normalize import normalize_plate
 from app.extraction.contract.schemas import Mention
 
 PLATE_PATTERN = re.compile(
@@ -12,7 +13,7 @@ def extract_plates(text: str, document_id: str) -> tuple[list[dict], list[Mentio
     entities: list[dict] = []
     mentions: list[Mention] = []
     for match in PLATE_PATTERN.finditer(text):
-        plate = "".join(part.upper() for part in match.groups())
+        plate = normalize_plate(match.group(0))
         start, end = match.span()
         entities.append({"type": "Vehicle", "id": plate, "properties": {"plate": plate}})
         mentions.append(

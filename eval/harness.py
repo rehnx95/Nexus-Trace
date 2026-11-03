@@ -6,6 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
+from app.extraction.llm.extractor import LLMExtractor
 from app.extraction.pretrained.extractor import PretrainedFirstExtractor
 
 
@@ -16,7 +17,7 @@ def load_jsonl(path: Path) -> list[dict]:
         return [json.loads(line) for line in handle if line.strip()]
 
 
-def score_set(records: list[dict]) -> dict:
+def score_set(records: list[dict], mode: str = "pretrained") -> dict:
     expected_entities = {
         (record["id"], entity["type"], entity["id"])
         for record in records
@@ -35,13 +36,38 @@ def score_set(records: list[dict]) -> dict:
         for relation in record["relations"]
     }
 
-    extractor = PretrainedFirstExtractor()
+    canonical_mode = {
+        "pretrained": "pretrained_only",
+        "llm": "llm_with_fallback",
+        "llm_fallback": "llm_with_fallback",
+    }.get(mode, mode)
+    if canonical_mode == "pretrained_only":
+        extractor = PretrainedFirstExtractor()
+    elif canonical_mode in {"llm_with_fallback", "llm_only"}:
+        extractor = LLMExtractor(
+            fallback_on_error=canonical_mode == "llm_with_fallback",
+        )
+    elif canonical_mode == "ensemble":
+        from app.pipeline.modes import ExtractionModeExtractor
+        extractor = ExtractionModeExtractor(canonical_mode)
+    else:
+        raise ValueError(f"Unsupported extraction mode: {mode}")
     predicted_entities = set()
     predicted_relations = set()
+    expected_ner = {
+        (record["id"], entity["type"], entity["start"], entity["end"])
+        for record in records
+        for entity in record["entities"]
+        if entity["type"] in {"Person", "Location", "Organization"}
+    }
+    predicted_ner = set()
     for record in records:
         result = extractor.extract([{"filename": record["id"] + ".txt", "text": record["text"]}])
         for entity in result.entities:
             predicted_entities.add((record["id"], entity.type, entity.id))
+            if entity.type in {"Person", "Location", "Organization"}:
+                for mention in entity.mentions:
+                    predicted_ner.add((record["id"], entity.type, mention.start, mention.end))
         for relation in result.edges:
             predicted_relations.add(
                 (
@@ -67,6 +93,7 @@ def score_set(records: list[dict]) -> dict:
 
     return {
         "entity": prf(expected_entities, predicted_entities),
+        "ner": prf(expected_ner, predicted_ner),
         "relation": prf(expected_relations, predicted_relations),
         "counts": {
             "expected_entities": len(expected_entities),
@@ -81,12 +108,26 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dev", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--phase", type=int, default=4)
+    parser.add_argument(
+        "--mode",
+        choices=[
+            "pretrained_only",
+            "llm_with_fallback",
+            "ensemble",
+            "llm_only",
+            "pretrained",
+            "llm",
+            "llm_fallback",
+        ],
+        default="pretrained_only",
+    )
     args = parser.parse_args()
 
     records = load_jsonl(args.dev / "reports.jsonl")
-    metrics = score_set(records)
+    metrics = score_set(records, args.mode)
     result = {
-        "phase": 2,
+        "phase": args.phase,
         "records": len(records),
         "metrics": metrics,
         "inputs": {
@@ -97,7 +138,7 @@ def main():
         ).hexdigest(),
     }
     args.output.mkdir(parents=True, exist_ok=True)
-    destination = args.output / "phase2-dev.json"
+    destination = args.output / f"phase{args.phase}-dev.json"
     destination.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps(result, indent=2))
 

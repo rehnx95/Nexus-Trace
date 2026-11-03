@@ -20,5 +20,5 @@ def test_gold_dev_layout_is_valid():
 def test_phase2_harness_returns_metrics():
     records = load_jsonl(ROOT / "datasets" / "gold" / "dev" / "reports.jsonl")
     metrics = score_set(records)
-    assert set(metrics) == {"entity", "relation", "counts"}
+    assert set(metrics) == {"entity", "ner", "relation", "counts"}
     assert set(metrics["entity"]) == {"precision", "recall", "f1"}
