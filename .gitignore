@@ -12,6 +12,8 @@ venv/
 # Env files (never commit real secrets)
 .env
 backend/.env
+models/
+datasets/synthetic/generated/latest/
 
 # OS/editor
 .DS_Store

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from typing import Any
+import json
 
 
 def load_pretrained_model() -> tuple[Any | None, dict]:
@@ -26,6 +27,29 @@ def load_pretrained_model() -> tuple[Any | None, dict]:
             }
 
     model_name = configured or os.getenv("SPACY_MODEL", "en_core_web_sm")
+    if configured:
+        report_path = model_path / "training_report.json"
+        if report_path.exists():
+            try:
+                report = json.loads(report_path.read_text(encoding="utf-8"))
+                entity_f1 = float(report.get("scores", {}).get("ents_f", 0.0))
+                minimum_f1 = float(os.getenv("NER_MINIMUM_F1", "0.75"))
+                if entity_f1 < minimum_f1:
+                    return None, {
+                        "model_status": "rejected",
+                        "model_warning": (
+                            f"Fine-tuned model rejected: entity F1 {entity_f1:.4f} "
+                            f"is below minimum {minimum_f1:.4f}"
+                        ),
+                        "model_path": configured,
+                        "entity_f1": entity_f1,
+                    }
+            except (OSError, json.JSONDecodeError, ValueError, TypeError) as exc:
+                return None, {
+                    "model_status": "rejected",
+                    "model_warning": f"Invalid fine-tuning report; model rejected: {exc}",
+                    "model_path": configured,
+                }
     try:
         model = spacy.load(str(model_name))
     except (OSError, ImportError) as exc:

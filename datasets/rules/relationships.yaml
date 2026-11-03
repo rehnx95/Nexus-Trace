@@ -1,4 +1,17 @@
 rules:
+  - id: REL-PARKED-NEAR
+    type: PARKED_NEAR
+    allowed_types: [["Vehicle", "Location"]]
+    role: bidirectional
+    confidence: 0.82
+    patterns:
+      - "\\b(?:vehicle\\s+)?[A-Z]{2}\\s*[- ]?[0-9]{1,2}\\s*[A-Z]{1,3}\\s*[0-9]{4}\\b.{0,80}\\b(?:parked|standing)\\b.{0,40}\\b(?:near|at|outside|close\\s+to)\\b"
+      - "\\b(?:parked|standing)\\b.{0,40}\\b(?:near|at|outside)\\b.{0,40}\\b(?:Market|Road|Terminal|Station|Bridge|Plaza|Gate|Area|Town)\\b"
+    positive:
+      - "Vehicle KA05MH1234 was parked near Central Market."
+      - "The vehicle TN09EF9012 was standing outside the Central Market."
+    negative:
+      - "KA05MH1234 is owned by Rohan Sharma."
   - id: REL-SPOTTED-AT
     type: SPOTTED_AT
     allowed_types: [["Person", "Location"]]
