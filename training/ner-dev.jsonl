@@ -1,0 +1,6 @@
+{"text": "Rohan Patel owns vehicle KA05AB1234.", "entities": [[0, 11, "Person"]]}
+{"text": "Nisha Rao called 9876543210 from the Central Market office.", "entities": [[0, 9, "Person"], [37, 51, "Location"]]}
+{"text": "A vehicle bearing MH12CD5678 was seen at River Road.", "entities": [[41, 51, "Location"]]}
+{"text": "Imran Sheikh and Priya Das were present, but no transaction was established.", "entities": [[0, 12, "Person"], [17, 26, "Person"]]}
+{"text": "The call record lists 9123456789, with TN09EF9012 noted as an unrelated vehicle reference.", "entities": []}
+{"text": "There is no evidence linking these entities to East Terminal.", "entities": [[47, 60, "Location"]]}

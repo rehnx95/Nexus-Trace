@@ -1,0 +1,7 @@
+{
+  "case_id": "demo-alpha",
+  "entity_ids": ["Arjun Iyer", "+919876543210", "KA05MH1234", "Central Market"],
+  "edge_types": ["USES_DEVICE", "SPOTTED_AT"],
+  "needs_review": true,
+  "anomalies": ["shared_phone_cross_case"]
+}

@@ -70,6 +70,14 @@ export const api = {
   audit: (caseId) => request(`/cases/${caseId}/audit`),
   auditAll: () => request('/audit/all'),
 
+  listMergeCandidates: () => request('/review/merges'),
+  listMergeDecisions: () => request('/review/decisions'),
+  decideMerge: (left, right, status) =>
+    request(
+      `/review/merges/${encodeURIComponent(left)}/${encodeURIComponent(right)}`,
+      { method: 'POST', body: JSON.stringify({ status }) },
+    ),
+
   // Node click popup: read-only entity detail
   entityDetail: (caseId, type, id) =>
     request(`/cases/${caseId}/entities/${type}/${encodeURIComponent(id)}`),

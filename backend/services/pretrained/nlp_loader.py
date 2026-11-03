@@ -1,7 +1,6 @@
 """
 spaCy NLP model loader - lazy loading with auto-download.
 """
-import spacy
 import os
 
 _nlp = None
@@ -14,6 +13,10 @@ def get_nlp():
     """
     global _nlp
     if _nlp is None:
+        try:
+            import spacy
+        except ImportError as exc:
+            raise RuntimeError("spaCy is required for pretrained extraction") from exc
         try:
             _nlp = spacy.load("en_core_web_sm")
         except OSError:

@@ -4,7 +4,7 @@
 
 An intelligent graph-based analysis platform for extracting entities from police FIR (First Information Report) and CDR (Call Detail Record) texts, building relationship networks, identifying key players, and detecting suspicious patterns across multiple cases.
 
-**[Full System Architecture Documentation](ARCHITECTURE.md)** — Comprehensive guide for senior engineers, and new contributors.
+**[Full System Architecture Documentation](docs/ARCHITECTURE.md)** — System structure, extraction modes, and deployment overview.
 
 ---
 
@@ -127,7 +127,7 @@ NexusTrace processes unstructured crime investigation documents and transforms t
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+.\venv\Scripts\Activate.ps1 
 
 pip install -r requirements.txt
 # If spaCy install fails: python -m spacy download en_core_web_sm
@@ -164,6 +164,44 @@ npm run dev
 ```
 
 Visit http://localhost:5173 in your browser.
+
+#### Docker Deployment
+
+Copy the root environment template and start the complete stack:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Services:
+
+- Frontend: http://localhost:5173
+- Backend: http://localhost:8000
+- Neo4j Browser: http://localhost:7474
+
+Change `NEO4J_PASSWORD`, `EXTRACTION_MODE`, and optional LLM settings in `.env`.
+
+Local evaluation metrics and submission readiness are tracked in:
+
+- [Gold-dev and phase status](docs/PHASE9_STATUS.md)
+- [Submission readiness checklist](docs/SUBMISSION_STATUS.md)
+- [Architecture](docs/ARCHITECTURE.md)
+
+---
+
+## Demo Walkthrough
+
+Phase 8 includes stable synthetic fixtures in `datasets/demo`:
+
+1. Start the backend and frontend.
+2. Create two cases, such as `demo-alpha` and `demo-beta`.
+3. Upload `datasets/demo/case-alpha/report.txt` to the first case.
+4. Upload `datasets/demo/case-beta/report.txt` to the second case.
+5. Open Merge Review to inspect the name-alias candidate.
+6. Compare the graphs for the shared phone and `Central Market` location.
+
+Each demo case has an `expected.json` fixture for entity, edge, review, and anomaly checks.
 
 ---
 

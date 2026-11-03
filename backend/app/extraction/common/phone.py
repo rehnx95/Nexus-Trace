@@ -13,7 +13,9 @@ def extract_phones(text: str, document_id: str) -> tuple[list[dict], list[Mentio
         phone_id = "+91" + local
         start, end = match.span()
         entities.append({"type": "Phone", "id": phone_id, "properties": {"number": phone_id}})
-        mentions.append(Mention(phone_id, start, end, "regex", 0.99, "IN-PHONE-E164", document_id))
+        mentions.append(
+            Mention(match.group(0), start, end, "regex", 0.99, "IN-PHONE-E164", document_id)
+        )
 
     unique = {entity["id"]: entity for entity in entities}
     return list(unique.values()), mentions

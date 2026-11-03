@@ -1,0 +1,14 @@
+{
+  "metrics": {
+    "pairs": 8,
+    "true_pairs": 5,
+    "auto_merges": 2,
+    "true_auto_merges": 2,
+    "false_auto_merges": 0,
+    "false_merge_rate": 0.0,
+    "same_entity_auto_plus_review_recall": 1.0
+  },
+  "inputs": {
+    "dev": "datasets\\resolution\\dev.jsonl"
+  }
+}

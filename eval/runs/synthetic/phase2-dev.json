@@ -1,0 +1,26 @@
+{
+  "phase": 2,
+  "records": 16,
+  "metrics": {
+    "entity": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "relation": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    "counts": {
+      "expected_entities": 32,
+      "predicted_entities": 8,
+      "expected_relations": 8,
+      "predicted_relations": 0
+    }
+  },
+  "inputs": {
+    "dev": "datasets\\synthetic\\generated\\dev"
+  },
+  "digest": "da96348f4c02953fea15979f0225db92f55b9b51fe436e29dd1a45b7598496b2"
+}

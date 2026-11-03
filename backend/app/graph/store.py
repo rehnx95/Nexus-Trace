@@ -21,7 +21,7 @@ class GraphStore(ABC):
 class InMemoryGraphStore(GraphStore):
     def __init__(self):
         self.entities: dict[str, dict[tuple[str, str], dict]] = {}
-        self.edges: dict[str, dict[tuple[str, str, str, str], dict]] = {}
+        self.edges: dict[str, dict[tuple[str, str, str, str, str], dict]] = {}
 
     def clear_case(self, case_id: str) -> None:
         self.entities.pop(case_id, None)
@@ -36,7 +36,13 @@ class InMemoryGraphStore(GraphStore):
     def write_edges(self, case_id: str, edges: list[Edge]) -> int:
         store = self.edges.setdefault(case_id, {})
         for edge in edges:
-            key = (edge.source_type, edge.source_id, edge.target_type, edge.target_id)
+            key = (
+                edge.source_type,
+                edge.source_id,
+                edge.type,
+                edge.target_type,
+                edge.target_id,
+            )
             existing = store.get(key)
             if existing:
                 merged = dict(existing["properties"])

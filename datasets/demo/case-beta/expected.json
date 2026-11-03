@@ -1,0 +1,7 @@
+{
+  "case_id": "demo-beta",
+  "entity_ids": ["Arjun Iyer", "+919876543210", "Central Market"],
+  "edge_types": ["USES_DEVICE", "SPOTTED_AT"],
+  "needs_review": true,
+  "anomalies": ["alias_candidate"]
+}

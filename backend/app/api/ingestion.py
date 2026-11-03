@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.graph.audit import write_batch
@@ -7,6 +9,8 @@ from app.pipeline.orchestrator import IngestionOrchestrator
 from services import cases as case_service
 
 router = APIRouter(prefix="/cases/{case_id}", tags=["ingestion"])
+MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_BYTES", 10 * 1024 * 1024))
+MAX_UPLOAD_FILES = int(os.environ.get("MAX_UPLOAD_FILES", 20))
 
 
 def _decode_upload(upload: UploadFile, content: bytes) -> str:
@@ -32,6 +36,8 @@ async def ingest_documents(
 
     if not files:
         raise HTTPException(422, "Upload at least one document.")
+    if len(files) > MAX_UPLOAD_FILES:
+        raise HTTPException(422, f"At most {MAX_UPLOAD_FILES} files may be uploaded.")
 
     documents = []
     rejected = []
@@ -47,6 +53,12 @@ async def ingest_documents(
             )
             continue
         content = await upload.read()
+        if len(content) > MAX_UPLOAD_BYTES:
+            rejected.append({
+                "filename": filename,
+                "error": f"File exceeds {MAX_UPLOAD_BYTES} bytes.",
+            })
+            continue
         if not content.strip():
             rejected.append({"filename": filename, "error": "File is empty."})
             continue
@@ -63,15 +75,17 @@ async def ingest_documents(
         raise HTTPException(422, "No processable text documents were uploaded.")
 
     writer = GraphWriter(Neo4jGraphStore(), audit=write_batch)
-    result, summary = IngestionOrchestrator(writer).run(
+    orchestrator = IngestionOrchestrator(writer)
+    result, summary = orchestrator.run(
         case_id,
         documents,
         append_mode=append_mode,
     )
+    extraction_mode = os.getenv("EXTRACTION_MODE", "pretrained_only").strip().lower()
     return {
         "ok": True,
         "case_id": case_id,
-        "extractor": "pretrained_first",
+        "extractor": extraction_mode,
         "files": len(documents),
         "rejected_files": rejected,
         "entities": len(result.entities),
