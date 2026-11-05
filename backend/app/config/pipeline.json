@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "stages": {
+    "entity_recognizer": "rules_spacy",
+    "candidate_generator": "sentence_dep",
+    "relation_scorer": "rules",
+    "resolver": "fuzzy_rapidfuzz"
+  },
+  "models": {
+    "spacy_base": "en_core_web_sm",
+    "spacy_ner": null
+  },
+  "llm": {
+    "enabled": false,
+    "route_below": 0.6
+  }
+}

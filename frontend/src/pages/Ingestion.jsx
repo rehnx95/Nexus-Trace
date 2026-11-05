@@ -112,7 +112,7 @@ try {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}>
           <input type="file" ref={fileInputRef} multiple onChange={handleFileChange}
-            accept=".pdf,.txt,.text,.csv,.xlsx,.xls,.tsv"
+            accept=".pdf,.txt,.text,.csv,.xlsx,.tsv,.docx"
             className="hidden" id="file-upload-input" />
           <label htmlFor="file-upload-input" className="cursor-pointer block">
             <div className="text-3xl mb-2">📁</div>

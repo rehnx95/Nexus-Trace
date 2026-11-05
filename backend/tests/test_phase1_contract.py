@@ -4,6 +4,7 @@ from app.extraction.common.plate import extract_plates
 from app.extraction.pretrained.extractor import PretrainedFirstExtractor
 from app.graph.store import InMemoryGraphStore
 from app.graph.writer import GraphWriter
+from app.core.config import pipeline_config, ontology_config, thresholds_config
 
 
 def test_phone_extraction_normalizes_indian_numbers_and_rejects_short_numbers():
@@ -86,3 +87,26 @@ def test_case_alpha_produces_evidence_backed_facts_without_invented_owner():
     assert ("Person", "Arjun Iyer", "USES_DEVICE", "Phone", "+919876543210") in keys
     assert ("Person", "Arjun Iyer", "SPOTTED_AT", "Location", "Central Market") in keys
     assert not any("OWN" in edge.type or "ASSOCIAT" in edge.type for edge in result.edges)
+
+
+def test_generic_configuration_and_crime_ontology_load():
+    pipeline = pipeline_config()
+    ontology = ontology_config()
+    thresholds = thresholds_config()
+
+    assert pipeline["stages"]["entity_recognizer"]
+    assert "Person" in ontology["entities"]
+    assert set(
+        [
+            "ASSOCIATED_WITH",
+            "PRESENT_AT",
+            "USES_DEVICE",
+            "OWNS",
+            "CALLS",
+            "MESSAGES",
+            "VICTIM_OF",
+            "SUSPECT_IN",
+            "WITNESS_TO",
+        ]
+    ).issubset(ontology["relationships"])
+    assert 0 <= thresholds["abstain_below"] <= 1
