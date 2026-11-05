@@ -1,24 +1,11 @@
-ENTITY_TYPES = {
-    "Person": {"id", "name"},
-    "Location": {"id", "name"},
-    "Organization": {"id", "name"},
-    "Vehicle": {"id", "plate"},
-    "Phone": {"id", "number"},
-    "BankAccount": {"id", "account_number", "kind"},
-}
+from app.core.config import ontology_config
 
+
+_ONTOLOGY = ontology_config()
+ENTITY_TYPES = _ONTOLOGY["entities"]
 RELATIONSHIPS = {
-    "INTERCEPTED_CALL": {("Phone", "Phone")},
-    "ASSOCIATE_OF": {("Person", "Person")},
-    "FINANCIAL_TRAIL": {
-        ("Person", "Person"),
-        ("Phone", "Phone"),
-        ("Person", "Organization"),
-        ("BankAccount", "BankAccount"),
-    },
-    "SPOTTED_AT": {("Person", "Location")},
-    "OWNS_VEHICLE": {("Person", "Vehicle")},
-    "USES_DEVICE": {("Person", "Phone")},
+    relation_type: {tuple(pair) for pair in pairs}
+    for relation_type, pairs in _ONTOLOGY["relationships"].items()
 }
 
 

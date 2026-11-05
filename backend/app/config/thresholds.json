@@ -1,0 +1,18 @@
+{
+  "fuzzy": {
+    "within_case": 85,
+    "cross_case": 93
+  },
+  "confidence": {
+    "regex": 0.98,
+    "table": 1.0,
+    "dependency": 0.80,
+    "trigger": 0.60,
+    "cooccurrence": 0.30
+  },
+  "abstain_below": 0.60,
+  "eval": {
+    "minimum_entity_f1": 0.75,
+    "minimum_relation_f1": 0.70
+  }
+}

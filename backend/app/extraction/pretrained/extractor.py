@@ -1,4 +1,5 @@
 import hashlib
+from dataclasses import replace
 from pathlib import PurePath
 
 from app.extraction.common.cdr import parse_cdr
@@ -20,6 +21,7 @@ class PretrainedFirstExtractor(Extractor):
     def extract(self, documents: list[dict]) -> ExtractionResult:
         entities: dict[tuple[str, str], Entity] = {}
         edges = []
+        document_provenance = {}
         diagnostics = {
             "documents": [],
             "phones": 0,
@@ -35,15 +37,24 @@ class PretrainedFirstExtractor(Extractor):
             text = document["text"]
             document_id = hashlib.sha256(text.encode("utf-8")).hexdigest()
             extension = PurePath(filename).suffix.lower()
+            document_provenance[document_id] = {
+                "filename": filename,
+                "file_type": document.get("file_type", extension.lstrip(".")),
+                "parser_version": document.get("parser_version"),
+                "source_units": document.get("source_units", []),
+            }
             diagnostics["documents"].append(
                 {
                     "filename": filename,
                     "document_id": document_id,
                     "extension": extension,
+                    "file_type": document.get("file_type", extension.lstrip(".")),
+                    "parser_version": document.get("parser_version"),
+                    "source_units": len(document.get("source_units", [])),
                 }
             )
 
-            if extension in {".csv", ".tsv"}:
+            if extension in {".csv", ".tsv", ".xlsx", ".xls"}:
                 cdr_entities, cdr_edges, cdr_diagnostics = parse_cdr(text, document_id)
                 if cdr_diagnostics["format"] != "unsupported":
                     for entity in cdr_entities:
@@ -182,6 +193,45 @@ class PretrainedFirstExtractor(Extractor):
             edges.extend(
                 self.relation_extractor.extract(text, list(entities.values()), document_id)
             )
+
+        provenance_entities = {}
+        for key, entity in entities.items():
+            document_ids = {
+                mention.document_id for mention in entity.mentions
+            }
+            source_documents = [
+                document_provenance[document_id]
+                for document_id in sorted(document_ids)
+                if document_id in document_provenance
+            ]
+            provenance_entities[key] = replace(
+                entity,
+                provenance={
+                    "documents": source_documents,
+                },
+            )
+        entities = provenance_entities
+
+        provenance_edges = []
+        for edge in edges:
+            document_ids = {
+                mention.document_id for mention in edge.evidence
+            }
+            source_documents = [
+                document_provenance[document_id]
+                for document_id in sorted(document_ids)
+                if document_id in document_provenance
+            ]
+            provenance_edges.append(
+                replace(
+                    edge,
+                    provenance={
+                        "documents": source_documents,
+                        "method": "pretrained-first-v1",
+                    },
+                )
+            )
+        edges = provenance_edges
 
         return ExtractionResult(
             entities=list(entities.values()),

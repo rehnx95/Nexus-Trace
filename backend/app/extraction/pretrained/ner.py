@@ -19,6 +19,10 @@ def merge_overlaps(entities: list[dict]) -> list[dict]:
     return merged
 
 
+VEHICLE_SPAN = re.compile(r"\b[A-Z]{2}\s*[0-9]{1,2}\s*[A-Z]{1,3}\s*[0-9]{4}\b", re.IGNORECASE)
+PHONE_SPAN = re.compile(r"(?<!\d)(?:\+?91[- ]?)?[6-9]\d{9}(?!\d)")
+
+
 class NerExtractor:
     def __init__(self, model=None, model_status=None):
         if model is None and model_status is None:
@@ -63,6 +67,8 @@ class NerExtractor:
         for span in spans:
             value = span["text"].strip()
             if not value:
+                continue
+            if VEHICLE_SPAN.fullmatch(value.strip()) or PHONE_SPAN.search(value):
                 continue
             if span["type"] == "Person":
                 entity_id = re.sub(r"\s+", " ", value)

@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "Person": {"id_property": "name", "display_property": "name"},
+    "Organization": {"id_property": "name", "display_property": "name"},
+    "Location": {"id_property": "name", "display_property": "name"},
+    "Phone": {"id_property": "number", "display_property": "number"},
+    "IMEI": {"id_property": "imei", "display_property": "imei"},
+    "Vehicle": {"id_property": "plate", "display_property": "plate"},
+    "BankAccount": {"id_property": "account_number", "display_property": "account_number"},
+    "UPI": {"id_property": "upi_id", "display_property": "upi_id"},
+    "IPAddress": {"id_property": "address", "display_property": "address"},
+    "MACAddress": {"id_property": "address", "display_property": "address"},
+    "Email": {"id_property": "address", "display_property": "address"},
+    "DateTime": {"id_property": "value", "display_property": "value"}
+  },
+  "relationships": {
+    "SPOTTED_AT": [["Person", "Location"]],
+    "OWNS_VEHICLE": [["Person", "Vehicle"]],
+    "INTERCEPTED_CALL": [["Phone", "Phone"]],
+    "ASSOCIATE_OF": [["Person", "Person"]],
+    "ASSOCIATED_WITH": [["Person", "Person"]],
+    "PRESENT_AT": [["Person", "Location"], ["Organization", "Location"]],
+    "PARKED_NEAR": [["Vehicle", "Location"]],
+    "USES_DEVICE": [["Person", "Phone"], ["Person", "IMEI"]],
+    "OWNS": [["Person", "Vehicle"], ["Person", "Organization"], ["Person", "BankAccount"]],
+    "DRIVES": [["Person", "Vehicle"]],
+    "WORKS_FOR": [["Person", "Organization"]],
+    "MEMBER_OF": [["Person", "Organization"]],
+    "CALLS": [["Phone", "Phone"]],
+    "MESSAGES": [["Phone", "Phone"]],
+    "FINANCIAL_TRAIL": [["Person", "Person"], ["Person", "BankAccount"], ["BankAccount", "BankAccount"], ["Person", "Organization"]],
+    "TRAVELLED_WITH": [["Person", "Person"]],
+    "REGISTERED_TO": [["Vehicle", "Person"]],
+    "RESIDES_AT": [["Person", "Location"]],
+    "LOCATED_AT_TOWER": [["Phone", "Location"], ["IMEI", "Location"]],
+    "VICTIM_OF": [["Person", "Organization"]],
+    "SUSPECT_IN": [["Person", "Organization"]],
+    "WITNESS_TO": [["Person", "Organization"]],
+    "INVESTIGATED_BY": [["Organization", "Organization"]]
+  }
+}

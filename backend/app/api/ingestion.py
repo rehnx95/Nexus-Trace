@@ -7,20 +7,11 @@ from app.graph.store import Neo4jGraphStore
 from app.graph.writer import GraphWriter
 from app.pipeline.orchestrator import IngestionOrchestrator
 from services import cases as case_service
+from app.ingestion.formats import parse_document
 
 router = APIRouter(prefix="/cases/{case_id}", tags=["ingestion"])
 MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_BYTES", 10 * 1024 * 1024))
 MAX_UPLOAD_FILES = int(os.environ.get("MAX_UPLOAD_FILES", 20))
-
-
-def _decode_upload(upload: UploadFile, content: bytes) -> str:
-    try:
-        return content.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        raise HTTPException(
-            422,
-            f"{upload.filename} is not UTF-8 text; scanned PDFs are unsupported.",
-        )
 
 
 @router.post("/documents")
@@ -43,15 +34,6 @@ async def ingest_documents(
     rejected = []
     for upload in files:
         filename = upload.filename or "unnamed"
-        suffix = filename.lower().rsplit(".", 1)[-1]
-        if suffix not in {"txt", "text", "csv", "tsv"}:
-            rejected.append(
-                {
-                    "filename": filename,
-                    "error": "Unsupported format. TXT, CSV, and TSV files are supported.",
-                }
-            )
-            continue
         content = await upload.read()
         if len(content) > MAX_UPLOAD_BYTES:
             rejected.append({
@@ -59,13 +41,28 @@ async def ingest_documents(
                 "error": f"File exceeds {MAX_UPLOAD_BYTES} bytes.",
             })
             continue
-        if not content.strip():
-            rejected.append({"filename": filename, "error": "File is empty."})
+        parsed = parse_document(filename, content)
+        if parsed.rejected_reason:
+            rejected.append({
+                "filename": filename,
+                "error": parsed.rejected_reason,
+            })
             continue
         documents.append(
             {
                 "filename": filename,
-                "text": _decode_upload(upload, content),
+                "text": parsed.text,
+                "source_units": [
+                    {
+                        "text": unit.text,
+                        "source": unit.source,
+                        "offset_start": unit.offset_start,
+                        "offset_end": unit.offset_end,
+                    }
+                    for unit in parsed.units
+                ],
+                "file_type": parsed.file_type,
+                "parser_version": "format-parser-v1",
             }
         )
 
